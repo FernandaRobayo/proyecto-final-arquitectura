@@ -10,8 +10,8 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "roles")
-public class Role implements Serializable {
+@Table(name = "species")
+public class Species implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -19,7 +19,7 @@ public class Role implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(nullable = false, unique = true, length = 50)
+	@Column(nullable = false, unique = true, length = 80)
 	private String name;
 
 	public Long getId() {

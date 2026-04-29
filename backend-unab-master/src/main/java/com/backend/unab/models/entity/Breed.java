@@ -4,14 +4,17 @@ import java.io.Serializable;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "roles")
-public class Role implements Serializable {
+@Table(name = "breed")
+public class Breed implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -19,7 +22,11 @@ public class Role implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(nullable = false, unique = true, length = 50)
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@JoinColumn(name = "species_id", nullable = false)
+	private Species species;
+
+	@Column(nullable = false, length = 80)
 	private String name;
 
 	public Long getId() {
@@ -28,6 +35,14 @@ public class Role implements Serializable {
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public Species getSpecies() {
+		return species;
+	}
+
+	public void setSpecies(Species species) {
+		this.species = species;
 	}
 
 	public String getName() {

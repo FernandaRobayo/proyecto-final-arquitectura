@@ -1,39 +1,62 @@
 package com.backend.unab.models.entity;
 
-import javax.persistence.*;
-import java.util.List;
+import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.PrePersist;
+import javax.persistence.Table;
 
 @Entity
 @Table(name = "users")
-public class User {
+public class User implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(unique = true, length = 20)
+	@Column(name = "full_name", nullable = false, length = 120)
+	private String fullName;
+
+	@Column(nullable = false, unique = true, length = 50)
 	private String username;
 
-	@Column(length = 150)
-	private String nombre;
-
+	@Column(nullable = false, unique = true, length = 120)
 	private String email;
 
-	@Column(length = 200)
+	@Column(nullable = false, length = 255)
 	private String password;
 
-	@ManyToMany(fetch = FetchType.LAZY)
+	@Column(nullable = false)
+	private Boolean enabled;
+
+	@Column(name = "created_at", nullable = false, updatable = false)
+	private LocalDateTime createdAt;
+
+	@ManyToMany(fetch = FetchType.EAGER)
 	@JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
-	private List<Role> roles;
+	private Set<Role> roles = new HashSet<>();
 
-	public User() {
-	}
-
-	public User(String username, String email, String password, String nombre) {
-		this.username = username;
-		this.email = email;
-		this.password = password;
-		this.nombre = nombre;
+	@PrePersist
+	public void prePersist() {
+		if (createdAt == null) {
+			createdAt = LocalDateTime.now();
+		}
+		if (enabled == null) {
+			enabled = Boolean.TRUE;
+		}
 	}
 
 	public Long getId() {
@@ -42,6 +65,14 @@ public class User {
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public String getFullName() {
+		return fullName;
+	}
+
+	public void setFullName(String fullName) {
+		this.fullName = fullName;
 	}
 
 	public String getUsername() {
@@ -68,26 +99,27 @@ public class User {
 		this.password = password;
 	}
 
-	public List<Role> getRoles() {
+	public Boolean getEnabled() {
+		return enabled;
+	}
+
+	public void setEnabled(Boolean enabled) {
+		this.enabled = enabled;
+	}
+
+	public LocalDateTime getCreatedAt() {
+		return createdAt;
+	}
+
+	public void setCreatedAt(LocalDateTime createdAt) {
+		this.createdAt = createdAt;
+	}
+
+	public Set<Role> getRoles() {
 		return roles;
 	}
 
-	public void setRoles(List<Role> roles) {
+	public void setRoles(Set<Role> roles) {
 		this.roles = roles;
 	}
-
-	@Override
-	public String toString() {
-		return "User{" + "id=" + id + ", username=" + username + ", email=" + email + ", password=" + password
-				+ ", roles=" + roles + '}';
-	}
-	
-	public String getNombre() {
-		return this.nombre;
-	}
-	
-	public void setNombre(String nombre) {
-		this.nombre = nombre;
-	}
-
 }
