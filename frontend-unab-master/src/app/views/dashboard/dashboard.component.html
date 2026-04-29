@@ -1,0 +1,20 @@
+<app-breadcrumb title="Dashboard"></app-breadcrumb>
+
+<section class="content">
+  <div class="container">
+    <div class="card card-outline card-primary elevation-2">
+      <div class="card-body dashboard-hero">
+        <span class="dashboard-kicker">Resumen</span>
+        <h2>Gestion centralizada de equipos y partidos</h2>
+        <p>
+          Esta version prioriza una interfaz ligera, sin elementos decorativos innecesarios,
+          para facilitar su despliegue y operacion en entornos como Amazon Web Services.
+        </p>
+        <div class="dashboard-actions">
+          <a [routerLink]="['/matchs']" class="btn btn-primary">Ver partidos</a>
+          <a [routerLink]="['/teams']" class="btn btn-outline-secondary">Ver equipos</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

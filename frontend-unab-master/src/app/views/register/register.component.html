@@ -1,0 +1,35 @@
+<div class="login-box">
+  <div class="card card-outline card-primary">
+    <div class="card-body">
+      <div class="auth-copy">
+        <span class="auth-eyebrow">Registro</span>
+        <h1>Crea tu cuenta</h1>
+        <p>Registra un usuario nuevo para ingresar al panel sin depender de credenciales precargadas.</p>
+      </div>
+
+      <form [formGroup]="frmRegister" (submit)="registrar()">
+        <div class="input-group mb-3">
+          <input type="text" class="form-control" placeholder="Nombre" formControlName="nombre">
+        </div>
+        <div class="input-group mb-3">
+          <input type="email" class="form-control" placeholder="Correo" formControlName="correo">
+        </div>
+        <div class="input-group mb-3">
+          <input type="text" class="form-control" placeholder="Usuario" formControlName="usuario">
+        </div>
+        <div class="input-group mb-3">
+          <input type="password" class="form-control" placeholder="Contrasena" formControlName="password">
+        </div>
+        <div class="row">
+          <div class="col-12">
+            <button type="submit" class="btn btn-primary btn-block">Registrar</button>
+          </div>
+        </div>
+      </form>
+
+      <p class="mb-1 auth-link">
+        <a [routerLink]="['/login']">Volver al inicio de sesion</a>
+      </p>
+    </div>
+  </div>
+</div>

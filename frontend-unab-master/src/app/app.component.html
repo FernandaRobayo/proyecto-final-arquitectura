@@ -1,0 +1,28 @@
+<ng-container *ngIf="showAppShell">
+  <div class="app-shell">
+    <header class="app-header">
+      <div class="app-header__brand">
+        <span class="app-header__eyebrow">Gestion deportiva</span>
+        <a [routerLink]="['/dashboard']" class="app-header__title">Panel de administracion</a>
+      </div>
+
+      <nav class="app-nav">
+        <a [routerLink]="['/dashboard']" routerLinkActive="is-active" [routerLinkActiveOptions]="{ exact: true }">Inicio</a>
+        <a [routerLink]="['/matchs']" routerLinkActive="is-active">Partidos</a>
+        <a [routerLink]="['/teams']" routerLinkActive="is-active">Equipos</a>
+      </nav>
+
+      <button type="button" class="btn btn-outline-secondary app-logout" (click)="logout()">
+        Cerrar sesion
+      </button>
+    </header>
+
+    <main class="app-main">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</ng-container>
+
+<ng-container *ngIf="!showAppShell">
+  <router-outlet></router-outlet>
+</ng-container>

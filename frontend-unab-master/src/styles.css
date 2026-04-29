@@ -1,0 +1,74 @@
+:root {
+  --primary-color: #235643;
+  --primary-strong: #173c2f;
+  --accent-color: #d9a441;
+  --surface-color: #ffffff;
+  --surface-muted: #f4f7f4;
+  --border-color: #dbe5de;
+  --text-color: #1d2b24;
+  --muted-color: #66756d;
+}
+
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  color: var(--text-color);
+  background: var(--surface-muted);
+  font-family: "Segoe UI", "Helvetica Neue", sans-serif;
+}
+
+.card-outline { border-top: 2px solid var(--primary-color) !important; }
+
+.card {
+  border: 1px solid var(--border-color);
+  border-radius: 18px;
+  box-shadow: 0 14px 34px rgba(29, 43, 36, 0.06);
+}
+
+.card-body { padding: 1.5rem; }
+
+.btn-primary {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  color: #fff;
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary.focus {
+  background-color: var(--primary-strong);
+  border-color: var(--primary-strong);
+  color: #fff;
+}
+
+.btn-outline-secondary {
+  color: var(--muted-color);
+  border-color: var(--border-color);
+}
+
+.btn-outline-secondary:hover {
+  color: var(--text-color);
+  background: #eef4f0;
+  border-color: var(--border-color);
+}
+
+.form-control,
+.custom-select {
+  min-height: 46px;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: none;
+}
+
+.form-control:focus,
+.custom-select:focus {
+  border-color: rgba(35, 86, 67, 0.4);
+  box-shadow: 0 0 0 0.2rem rgba(35, 86, 67, 0.12);
+}
+
+.login-page {
+  background:
+    radial-gradient(circle at top right, rgba(35, 86, 67, 0.14), transparent 32%),
+    linear-gradient(180deg, #f8fbf8 0%, #edf3ef 100%);
+}
