@@ -1,6 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import { HttpClientModule } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { AppRoutingModule } from './app-routing.module';
@@ -10,14 +10,16 @@ import { ToastrModule } from 'ngx-toastr';
 import { GeneralModule } from './views/general/general.module';
 import { LoginComponent } from './views/login/login.component';
 import { DashboardComponent } from './views/dashboard/dashboard.component';
-import { RegisterComponent } from './views/register/register.component';
+import { NotFoundComponent } from './views/not-found/not-found.component';
+import { AuthInterceptor } from './interceptors/auth.interceptor';
+import { ResourcesModule } from './views/resources/resources.module';
 
 @NgModule({
   declarations: [
     AppComponent,
     LoginComponent,
     DashboardComponent,
-    RegisterComponent
+    NotFoundComponent
   ],
   imports: [
     BrowserModule,
@@ -29,9 +31,16 @@ import { RegisterComponent } from './views/register/register.component';
     ToastrModule.forRoot({
       positionClass: 'toast-bottom-right'
     }),
-    GeneralModule
+    GeneralModule,
+    ResourcesModule
   ],
-  providers: [],
+  providers: [
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: AuthInterceptor,
+      multi: true
+    }
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

@@ -2,19 +2,21 @@
   <div class="app-shell">
     <header class="app-header">
       <div class="app-header__brand">
-        <span class="app-header__eyebrow">Gestion deportiva</span>
-        <a [routerLink]="['/dashboard']" class="app-header__title">Panel de administracion</a>
+        <span class="app-header__eyebrow">Veterinary Suite</span>
+        <a [routerLink]="['/dashboard']" class="app-header__title">Panel veterinario</a>
       </div>
 
       <nav class="app-nav">
         <a [routerLink]="['/dashboard']" routerLinkActive="is-active" [routerLinkActiveOptions]="{ exact: true }">Inicio</a>
-        <a [routerLink]="['/matchs']" routerLinkActive="is-active">Partidos</a>
-        <a [routerLink]="['/teams']" routerLinkActive="is-active">Equipos</a>
+        <a *ngFor="let item of navItems" [routerLink]="[item.path]" routerLinkActive="is-active">{{ item.label }}</a>
       </nav>
 
-      <button type="button" class="btn btn-outline-secondary app-logout" (click)="logout()">
-        Cerrar sesion
-      </button>
+      <div class="app-session">
+        <span class="app-session__name">{{ fullName }}</span>
+        <button type="button" class="btn btn-outline-secondary app-logout" (click)="logout()">
+          Cerrar sesion
+        </button>
+      </div>
     </header>
 
     <main class="app-main">

@@ -1,0 +1,94 @@
+<app-breadcrumb [title]="pageTitle"></app-breadcrumb>
+
+<section class="content">
+  <div class="container">
+    <div class="card card-outline card-primary">
+      <div class="card-body">
+        <div class="resource-toolbar">
+          <div>
+            <h2>{{ pageTitle }}</h2>
+            <p>{{ config?.description }}</p>
+          </div>
+        </div>
+
+        <div *ngIf="loading" class="resource-state">
+          Cargando informacion...
+        </div>
+
+        <form *ngIf="!loading" [formGroup]="form" (ngSubmit)="save()">
+          <div class="form-row">
+            <div
+              *ngFor="let field of config.fields"
+              class="form-group"
+              [ngClass]="field.type === 'textarea' ? 'col-12' : 'col-md-6'"
+            >
+              <label>{{ field.label }}</label>
+
+              <ng-container [ngSwitch]="field.type">
+                <input
+                  *ngSwitchCase="'text'"
+                  class="form-control"
+                  [formControlName]="field.key"
+                  [placeholder]="field.placeholder || field.label"
+                >
+
+                <input
+                  *ngSwitchCase="'email'"
+                  type="email"
+                  class="form-control"
+                  [formControlName]="field.key"
+                  [placeholder]="field.placeholder || field.label"
+                >
+
+                <input
+                  *ngSwitchCase="'date'"
+                  type="date"
+                  class="form-control"
+                  [formControlName]="field.key"
+                >
+
+                <input
+                  *ngSwitchCase="'datetime-local'"
+                  type="datetime-local"
+                  class="form-control"
+                  [formControlName]="field.key"
+                >
+
+                <input
+                  *ngSwitchCase="'number'"
+                  type="number"
+                  step="any"
+                  class="form-control"
+                  [formControlName]="field.key"
+                  [placeholder]="field.placeholder || field.label"
+                >
+
+                <select *ngSwitchCase="'select'" class="custom-select" [formControlName]="field.key">
+                  <option [ngValue]="''">Selecciona una opcion</option>
+                  <option *ngFor="let option of options[field.key]" [ngValue]="option.value">{{ option.label }}</option>
+                </select>
+
+                <textarea
+                  *ngSwitchCase="'textarea'"
+                  rows="4"
+                  class="form-control"
+                  [formControlName]="field.key"
+                  [placeholder]="field.placeholder || field.label"
+                ></textarea>
+              </ng-container>
+
+              <small *ngIf="hasError(field)" class="text-danger">
+                Este campo es obligatorio.
+              </small>
+            </div>
+          </div>
+
+          <div class="resource-actions">
+            <button type="submit" class="btn btn-primary">Guardar</button>
+            <button type="button" class="btn btn-outline-secondary" (click)="cancel()">Cancelar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>

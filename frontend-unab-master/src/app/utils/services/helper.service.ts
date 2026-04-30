@@ -2,9 +2,6 @@ import { Location } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
-import Swal from 'sweetalert2';
-
-declare const $: any;
 
 @Injectable({
   providedIn: 'root'
@@ -22,43 +19,17 @@ export class HelperService {
   }
 
   createDatatable(): void {
-    setTimeout(() => {
-      $("#table").DataTable({
-        paging: true,
-        lengthChange: false,
-        searching: true,
-        ordering: true,
-        info: true,
-        autoWidth: false,
-        responsive: true,
-        language: {
-          url: '//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json'
-        }
-      });
-    }, 500);
+    // Datatables was removed from the main flow to keep the UI lightweight.
   }
 
   destroyDatatable(): void {
-    if ($.fn.DataTable.isDataTable('#table')) {
-      $('#table').DataTable().destroy();
-    }
+    // Datatables was removed from the main flow to keep the UI lightweight.
   }
 
   confirmDelete(callback: () => void): void {
-    Swal.fire({
-      title: 'Seguro que desea realizar esta accion?',
-      text: 'Esta accion no se puede deshacer',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#F8E12E',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Si, eliminar',
-      cancelButtonText: 'Cancelar'
-    }).then((result) => {
-      if (result.isConfirmed) {
-        callback();
-      }
-    });
+    if (window.confirm('Esta accion no se puede deshacer. Deseas continuar?')) {
+      callback();
+    }
   }
 
   showMessage(type: string, message: string, title: string = 'Mensaje del sistema'): void {
@@ -75,6 +46,34 @@ export class HelperService {
       default:
         break;
     }
+  }
+
+  getHttpErrorMessage(error: any, fallback: string): string {
+    if (error?.status === 0) {
+      return 'No fue posible conectar con el backend. Verifica que el servicio este activo en el puerto 9090.';
+    }
+
+    if (error?.status === 401) {
+      return 'Usuario o contrasena invalidos.';
+    }
+
+    if (error?.status === 403) {
+      return 'No tienes permisos para realizar esta accion.';
+    }
+
+    if (error?.status === 404) {
+      return 'El recurso solicitado no existe o no esta disponible.';
+    }
+
+    if (error?.error?.message) {
+      return error.error.message;
+    }
+
+    if (error?.message) {
+      return error.message;
+    }
+
+    return fallback;
   }
 }
 

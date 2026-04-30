@@ -1,0 +1,30 @@
+.resource-toolbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+
+.resource-toolbar h2 {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.resource-toolbar p {
+  margin: 0.35rem 0 0;
+  color: var(--muted-color);
+}
+
+.resource-state {
+  padding: 1rem 0.25rem;
+  color: var(--muted-color);
+}
+
+.resource-actions {
+  display: flex;
+  gap: 0.5rem;
+  white-space: nowrap;
+}

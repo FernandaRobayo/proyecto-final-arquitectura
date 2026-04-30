@@ -1,0 +1,14 @@
+
+> frontend-unab@0.0.0 build
+> ng build --no-progress
+
+(node:9716) [DEP0060] DeprecationWarning: The `util._extend` API is deprecated. Please use Object.assign() instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+
+chunk {main} main.js, main.js.map (main) 205 kB [initial] [rendered]
+chunk {polyfills} polyfills.js, polyfills.js.map (polyfills) 141 kB [initial] [rendered]
+chunk {runtime} runtime.js, runtime.js.map (runtime) 6.15 kB [entry] [rendered]
+chunk {scripts} scripts.js, scripts.js.map (scripts) 337 kB [entry] [rendered]
+chunk {styles} styles.js, styles.js.map (styles) 6.4 MB [initial] [rendered]
+chunk {vendor} vendor.js, vendor.js.map (vendor) 2.98 MB [initial] [rendered]
+Date: 2026-04-30T19:34:38.132Z - Hash: 442cbb0c5e68e7cada51 - Time: 6019ms

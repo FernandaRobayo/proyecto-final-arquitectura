@@ -4,23 +4,33 @@
       <div class="auth-copy">
         <span class="auth-eyebrow">Acceso</span>
         <h1>Inicia sesion</h1>
-        <p>Administra partidos y equipos desde una interfaz simple y ligera.</p>
+        <p>Administra clientes, mascotas, citas e historiales del sistema veterinario.</p>
       </div>
 
       <form [formGroup]="frmLogin" (submit)="iniciarSesion()">
         <div class="input-group mb-3">
-          <input type="text" class="form-control" placeholder="Usuario" formControlName="usuario">
+          <input type="text" class="form-control" placeholder="Usuario" formControlName="username">
         </div>
 
         <div class="input-group mb-3">
           <input type="password" class="form-control" placeholder="Contrasena" formControlName="password">
         </div>
 
-        <button type="submit" class="btn btn-primary btn-block">Ingresar</button>
+        <div class="auth-feedback auth-feedback--error" *ngIf="authError">
+          {{ authError }}
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" [disabled]="isSubmitting">
+          {{ isSubmitting ? 'Ingresando...' : 'Ingresar' }}
+        </button>
       </form>
 
-      <p class="mb-1 auth-link">
-        <a [routerLink]="['/register']">Registro nuevo usuario</a>
+      <p class="mb-0 auth-link auth-link--muted">
+        El acceso se realiza con los usuarios disponibles en el backend del entorno actual.
+      </p>
+
+      <p class="mb-0 auth-link auth-link--muted">
+        Backend: {{ backendUrl }}
       </p>
     </div>
   </div>

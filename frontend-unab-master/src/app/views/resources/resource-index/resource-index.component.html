@@ -1,0 +1,52 @@
+<app-breadcrumb [title]="config?.label"></app-breadcrumb>
+
+<section class="content">
+  <div class="container">
+    <div class="card card-outline card-primary">
+      <div class="card-body">
+        <div class="resource-toolbar">
+          <div>
+            <h2>{{ config?.label }}</h2>
+            <p>{{ config?.description }}</p>
+          </div>
+
+          <a class="btn btn-primary" [routerLink]="['/', config?.routeSegment, 'create']">
+            Nuevo {{ config?.singularLabel }}
+          </a>
+        </div>
+
+        <div *ngIf="loading" class="resource-state">
+          Cargando informacion...
+        </div>
+
+        <div *ngIf="!loading && items.length" class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th *ngFor="let column of config.columns">{{ column.label }}</th>
+                <th class="resource-actions">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of items">
+                <td *ngFor="let column of config.columns">{{ formatValue(item, column) }}</td>
+                <td class="resource-actions">
+                  <a class="btn btn-sm btn-outline-secondary" [routerLink]="['/', config.routeSegment, 'edit', item.id]">
+                    Editar
+                  </a>
+                  <button type="button" class="btn btn-sm btn-outline-danger" (click)="deleteItem(item)">
+                    Eliminar
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div *ngIf="!loading && !items.length" class="resource-state">
+          No hay registros disponibles para {{ config?.label }}.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

@@ -44,12 +44,12 @@ docker compose down -v
 ```
 
 ## URLs esperadas
-- Frontend: `http://localhost:4200`
+- Frontend: `http://localhost:3000` o `http://127.0.0.1:3000`
 - Backend: `http://localhost:9090`
 - MySQL: `localhost:3306`
 
 ## Validacion rapida
 1. Ejecutar `docker compose up --build -d`.
 2. Verificar contenedores activos con `docker compose ps`.
-3. Abrir `http://localhost:4200`.
+3. Abrir `http://localhost:3000` o `http://127.0.0.1:3000`.
 4. Probar autenticacion/consumo de endpoints contra `http://localhost:9090`.

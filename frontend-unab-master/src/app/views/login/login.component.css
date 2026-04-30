@@ -37,3 +37,21 @@
   color: var(--primary-color);
   font-weight: 600;
 }
+
+.auth-link--muted {
+  color: var(--muted-color);
+}
+
+.auth-feedback {
+  margin-bottom: 1rem;
+  padding: 0.8rem 0.95rem;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+.auth-feedback--error {
+  color: #7a1f1f;
+  background: #fdeeee;
+  border: 1px solid #f2c9c9;
+}

@@ -1,6 +1,8 @@
 import { Component, DoCheck, Inject } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { Router } from '@angular/router';
+import { ResourceNavigationItem, ResourceRegistryService } from './services/resource-registry.service';
+import { LoginService } from './views/login/login.service';
 
 @Component({
   selector: 'app-root',
@@ -8,20 +10,31 @@ import { Router } from '@angular/router';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements DoCheck {
-  public localStorage: Storage = localStorage;
+  public navItems: ResourceNavigationItem[] = [];
 
-  constructor(@Inject(DOCUMENT) private document: Document, private router: Router) {}
+  constructor(
+    @Inject(DOCUMENT) private document: Document,
+    private router: Router,
+    private loginService: LoginService,
+    private resourceRegistryService: ResourceRegistryService
+  ) {
+    this.navItems = this.resourceRegistryService.getNavigationItems();
+  }
 
   get isAuthenticated(): boolean {
-    return this.localStorage.getItem('token') != null;
+    return this.loginService.isAuthenticated();
   }
 
   get isAuthScreen(): boolean {
-    return this.router.url.startsWith('/login') || this.router.url.startsWith('/register');
+    return this.router.url.startsWith('/login');
   }
 
   get showAppShell(): boolean {
     return this.isAuthenticated && !this.isAuthScreen;
+  }
+
+  get fullName(): string {
+    return this.loginService.getFullName();
   }
 
   ngDoCheck(): void {
@@ -32,7 +45,7 @@ export class AppComponent implements DoCheck {
   }
 
   logout(): void {
-    this.localStorage.removeItem('token');
+    this.loginService.logout();
     this.router.navigate(['/login']);
   }
 }
