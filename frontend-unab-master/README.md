@@ -14,6 +14,17 @@ Run `ng generate component component-name` to generate a new component. You can 
 
 Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
 
+## Production deployment
+
+The preferred low-cost AWS deployment for this frontend is:
+
+- static Angular build
+- Amazon S3 for hosting
+- Amazon CloudFront for CDN and SPA delivery
+- backend routed through `/api/*` at the edge layer
+
+In production, the frontend does not require an Nginx container. The generated app is expected to call `/api/...` on the same public domain, with CloudFront forwarding that path to the backend origin.
+
 ## Running unit tests
 
 Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).

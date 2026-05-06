@@ -8,7 +8,17 @@ Aceptado - 2026-05-02
 
 # Contexto
 
-El proyecto ya organiza su documentacion de arquitectura bajo `docs/02-architecture/`, separando vistas del estado actual y vistas objetivo.
+El proyecto organiza su documentacion de arquitectura bajo `docs/02-architecture/`, separando vistas del estado actual y vistas objetivo.
+
+---
+
+# Problema
+
+Sin un modelo comun de documentacion arquitectonica:
+
+* se dificulta explicar la arquitectura por niveles
+* la relacion entre estado actual y evolucion futura queda ambigua
+* las decisiones documentadas en ADR pierden contexto visual
 
 ---
 
@@ -33,15 +43,21 @@ docs/02-architecture/
 └── adr/
 ```
 
-Las vistas `as-is` documentan la implementacion actual confirmada y las `to-be` documentan el estado objetivo planificado.
+Las vistas `as-is` documentan la implementacion actual confirmada. Las vistas `to-be` existen como espacio reservado para el estado objetivo, pero su contenido puede estar pendiente o incompleto en el proyecto actual.
 
 ---
 
-# Diagrama del modelo
+# Stack tecnologico
+
+No aplica directamente para este ADR.
+
+---
+
+# Diagrama del stack
 
 ```
 as-is -> arquitectura implementada
-to-be -> arquitectura objetivo
+to-be -> arquitectura objetivo o pendiente de completar
 ADR   -> decisiones y razonamiento
 ```
 
@@ -57,12 +73,30 @@ ADR   -> decisiones y razonamiento
 
 ---
 
+# Beneficios Arquitectonicos
+
+* Facilita lectura por niveles
+* Separa estado actual de evolucion futura
+* Da contexto visual a las decisiones documentadas en ADR
+
+---
+
 # Trade-offs
 
 | Ventaja | Desventaja |
 |---|---|
 | Facilita lectura por niveles | Requiere mantener sincronizadas las vistas con el codigo |
-| Distingue estado actual y objetivo | La cobertura de niveles no es identica entre `as-is` y `to-be` |
+| Distingue estado actual y objetivo | El area `to-be` aun no esta completa en el proyecto actual |
+
+---
+
+# Impacto en el Sistema
+
+**Documentacion actual:** `as-is` contiene vistas utiles para contexto, contenedores y componentes.
+
+**Documentacion futura:** `to-be` no debe presentarse como completa mientras sus archivos sigan vacios o incompletos.
+
+**ADR:** Los ADR actuales y futuros deben apoyarse en `as-is` cuando describen implementacion real y en `to-be` solo cuando exista contenido suficiente.
 
 ---
 
@@ -79,5 +113,5 @@ ADR   -> decisiones y razonamiento
 # Validacion
 
 * Confirmar las carpetas `as-is` y `to-be`
-* Confirmar vistas C4 reales presentes en cada carpeta
-* Confirmar que `adr/` existe como area de decisiones arquitectonicas
+* Confirmar que `as-is` contiene vistas reales presentes en el repositorio
+* Confirmar que `to-be` existe, pero sin afirmar cobertura completa si sus archivos siguen vacios o incompletos

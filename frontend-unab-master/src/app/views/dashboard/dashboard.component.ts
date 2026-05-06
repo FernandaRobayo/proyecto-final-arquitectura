@@ -16,9 +16,9 @@ export class DashboardComponent implements OnInit {
   public appointmentsToday = 0;
   public activePatients = 0;
   public treatmentsInProgress = 0;
-  public nextAppointment = 'No appointments scheduled';
-  public assignedVet = 'Not assigned';
-  public appointmentStatus = 'No status';
+  public nextAppointment = 'No hay citas programadas';
+  public assignedVet = 'Sin asignar';
+  public appointmentStatus = 'Sin estado';
 
   constructor(
     private petService: PetService,
@@ -44,10 +44,10 @@ export class DashboardComponent implements OnInit {
       this.activePatients = 0;
       this.treatmentsInProgress = treatments.length;
       this.nextAppointment = nextAppointment
-        ? `${nextAppointment.petName || 'Pet'} - ${this.formatTime(nextAppointment.appointmentDateTime)}`
-        : 'No appointments scheduled';
-      this.assignedVet = nextAppointment?.veterinarianFullName || 'Not assigned';
-      this.appointmentStatus = nextAppointment?.status || 'No status';
+        ? `${nextAppointment.petName || 'Mascota'} - ${this.formatTime(nextAppointment.appointmentDateTime)}`
+        : 'No hay citas programadas';
+      this.assignedVet = nextAppointment?.veterinarianFullName || 'Sin asignar';
+      this.appointmentStatus = nextAppointment?.status || 'Sin estado';
     });
   }
 
@@ -93,7 +93,7 @@ export class DashboardComponent implements OnInit {
       return '--:--';
     }
 
-    return date.toLocaleTimeString('en-US', {
+    return date.toLocaleTimeString('es-CO', {
       hour: 'numeric',
       minute: '2-digit'
     });

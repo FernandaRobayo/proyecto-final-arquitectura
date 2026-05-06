@@ -1,113 +1,87 @@
-# ADR-011 — HTTPS obligatorio y terminación TLS en producción
+# ADR-011 - HTTPS obligatorio y terminacion TLS en despliegues reales
 
 ## Estado
 
-Propuesto — 2026-05-02
+Propuesto - 2026-05-02
 
 ---
 
 # Contexto
 
-El sistema usa HTTP Basic Authentication donde las credenciales se transmiten en Base64 en cada petición. Base64 no es cifrado; cualquier observador con acceso al tráfico puede decodificar las credenciales en texto claro.
+El sistema usa HTTP Basic Authentication. En ese mecanismo las credenciales se transportan en Base64, por lo que requieren un canal cifrado para no quedar expuestas durante el trafico real.
 
-El despliegue actual usa Docker Compose con Nginx sirviendo el frontend por HTTP en el puerto 3000, y Spring Boot exponiendo la API por HTTP en el puerto 9090. No existe configuración de TLS documentada ni implementada en el repositorio.
+El despliegue actual documentado en el repositorio es local con Docker Compose, frontend por HTTP y backend por HTTP. No hay configuracion TLS implementada en el proyecto actual.
 
 ---
 
 # Problema
 
-Sin HTTPS en producción:
+Sin HTTPS en despliegues reales:
 
-* las credenciales de usuario viajan en Base64 legible por cualquier actor en la red
-* un atacante con acceso a la red (MitM, sniffing) puede capturar y reutilizar credenciales
-* los datos del dominio viajan sin cifrar entre frontend, backend y usuario
-* los navegadores modernos marcan el sitio como "no seguro", degradando la confianza del usuario
-* cualquier token o encabezado de sesión puede interceptarse
+* las credenciales HTTP Basic pueden ser capturadas en transito
+* los datos del sistema viajan sin cifrado
+* se debilita la postura minima de seguridad del proyecto
 
 ---
 
-# Decisión Arquitectónica
+# Decision Arquitectonica
 
-Se propone implementar terminación TLS en Nginx como punto de entrada único del sistema:
+Propuesta futura.
 
-```
-Reglas:
-  · Nginx termina TLS: gestiona el certificado y expone HTTPS al exterior
-  · Redirección obligatoria: todo HTTP → HTTPS (301 Permanent)
-  · Backend en red interna: puerto 9090 no expuesto al exterior
-  · Acceso externo a la API pasa exclusivamente por Nginx como proxy reverso
-  · Certificados: Let's Encrypt (dominio público) o CA interna (intranet)
-```
+Se propone exigir HTTPS para cualquier despliegue real del sistema y delegar la terminacion TLS en el punto de entrada que resulte adecuado para el entorno:
 
-Configuración Nginx objetivo:
+* CloudFront, si el frontend se publica como sitio estatico en AWS
+* ALB o API Gateway, si la infraestructura futura lo requiere
+* Nginx, solo si se usa un despliegue contenedorizado con proxy frontal
 
-```nginx
-server {
-    listen 443 ssl;
-    ssl_certificate     /etc/ssl/certs/cert.pem;
-    ssl_certificate_key /etc/ssl/private/key.pem;
+No se define Nginx como unico terminador TLS.
 
-    location /api/ {
-        proxy_pass http://unab-backend:9090/api/;
-    }
-
-    location / {
-        try_files $uri $uri/ /index.html;
-    }
-}
-
-server {
-    listen 80;
-    return 301 https://$host$request_uri;
-}
-```
+Esta decision no responde a un requerimiento academico explicito, sino a una decision tecnica del proyecto orientada a reducir costos operativos al momento de desplegar en AWS.
 
 ---
 
-# Diagrama de terminación TLS
+# Stack tecnologico
+
+| Elemento | Estado actual | Propuesta futura |
+|---|---|---|
+| Autenticacion | HTTP Basic | HTTP Basic protegido por HTTPS |
+| Frontend local | Angular servido con Nginx por HTTP | Sin cambio local obligatorio |
+| Entrada productiva | No confirmada en el proyecto actual | CloudFront, ALB, API Gateway o Nginx segun entorno |
+
+---
+
+# Diagrama del stack
 
 ```
-  Usuario (Navegador)
-         │
-         │ HTTPS :443  (TLS terminado en Nginx)
-         ▼
-┌────────────────────────────────────────────────┐
-│                   Nginx                        │
-│                                                │
-│  listen 443 ssl;                               │
-│  ssl_certificate  /etc/ssl/certs/cert.pem      │
-│  ssl_certificate_key /etc/ssl/private/key.pem  │
-│                                                │
-│  /api/ → proxy_pass http://unab-backend:9090/  │
-│  /     → Angular SPA (artefacto estático)      │
-│                                                │
-│  listen 80; → return 301 https://...           │
-└───────────────────────┬────────────────────────┘
-                        │  HTTP (red interna unab-network)
-                        ▼
-           Spring Boot Backend (:9090)
-           ← no expuesto al exterior →
+Usuario
+   |
+   | HTTPS
+   v
+Punto de entrada del entorno
+   |
+   +-- CloudFront / ALB / API Gateway / Nginx
+   |
+   v
+Frontend y/o backend segun arquitectura del despliegue
 ```
 
 ---
 
 # Alternativas consideradas
 
-| Alternativa | Descripción | Por qué no se eligió |
-|---|---|---|
-| TLS en Spring Boot directamente | Keystore en la JVM | Posible, pero Nginx como terminador es más eficiente y centraliza la gestión de certificados |
-| Migrar a JWT | Reemplazar HTTP Basic por tokens firmados | Mejora el mecanismo de auth pero no elimina la necesidad de HTTPS para proteger el tráfico |
-| VPN / red privada exclusiva | Aislar el sistema en red completamente privada | Depende de infraestructura externa; no elimina la necesidad de TLS para cumplimiento |
+| Alternativa | Por que no se eligio |
+|---|---|
+| Mantener HTTP en despliegues reales | No protege credenciales ni datos en transito |
+| Definir Nginx como unica opcion | No se alinea con la estrategia futura de AWS bajo costo ni con despliegues alternativos |
+| Cambiar primero el mecanismo de autenticacion y posponer TLS | No resuelve el riesgo de transporte en el corto plazo |
 
 ---
 
-# Beneficios Arquitectónicos
+# Beneficios Arquitectonicos
 
-* Las credenciales HTTP Basic viajan cifradas; un observador externo no puede decodificarlas
-* Todo el tráfico de datos del dominio queda protegido en tránsito
-* Nginx como proxy inverso centraliza la gestión de TLS sin cambiar código del backend
-* La redirección 301 garantiza que ningún cliente acceda por HTTP por error
-* Compatible con certificados gratuitos Let's Encrypt con renovación automática (certbot)
+* Protege credenciales y datos en transito
+* Reduce riesgo operativo del uso actual de HTTP Basic
+* Permite adaptar la terminacion TLS al entorno real de despliegue
 
 ---
 
@@ -115,41 +89,36 @@ server {
 
 | Ventaja | Desventaja |
 |---|---|
-| Protege las credenciales HTTP Basic en tránsito | Requiere certificado SSL válido y proceso de renovación |
-| Nginx proxy inverso unifica el punto de entrada | El puerto 9090 del backend no debe exponerse públicamente (cambio en `docker-compose.yml`) |
-| Let's Encrypt automatiza la renovación | Requiere dominio público o CA interna para intranets |
-| Mejora la confianza del navegador | Ligero overhead de handshake TLS (insignificante en la práctica) |
+| Mejora inmediata de seguridad en despliegues reales | Requiere definir y operar certificados en el entorno elegido |
+| No acopla la decision a una sola herramienta | La implementacion concreta depende de infraestructura futura |
 
 ---
 
 # Impacto en el Sistema
 
-**Backend:** Sin cambios de código. El puerto 9090 deja de exponerse públicamente en `docker-compose.yml`; el acceso externo pasa exclusivamente por Nginx.
+**Frontend:** Sin cambio funcional obligatorio; cambia la forma de publicacion en entornos reales.
 
-**Frontend:** Sin cambios de código Angular. Solo cambia el protocolo de acceso.
+**Backend:** Debe quedar protegido detras de un punto de entrada HTTPS si se expone fuera del entorno local.
 
-**Base de datos:** Sin impacto.
+**DevOps:** Requiere definir el terminador TLS segun el entorno real de despliegue.
 
-**DevOps:** `nginx/default.conf` debe configurar bloque SSL, redirección HTTP y `proxy_pass` al backend. `docker-compose.yml` debe montar certificados en el contenedor Nginx.
-
-**Seguridad:** Elimina la vulnerabilidad de credenciales en texto claro. Permite habilitar HSTS (HTTP Strict Transport Security) como mejora adicional.
-
-**Documentación:** `README-DOCKER.md` debe actualizarse con URLs HTTPS y el proceso de gestión de certificados.
+**Seguridad:** Es una mejora prioritaria mientras se mantenga HTTP Basic.
 
 ---
 
-# Evidencia (estado actual — base para la propuesta)
+# Evidencia
 
-* `frontend-unab-master/nginx/default.conf`: Configuración Nginx actual sin bloque SSL. Contenido no está en las entradas
-* `docker-compose.yml`: Puerto frontend `3000:80`; no existe montaje de certificados SSL
-* ADR-005 (archivado): Documenta HTTP Basic como mecanismo de autenticación y señala el riesgo de transmisión sin HTTPS
+* `backend-unab-master/src/main/java/com/backend/unab/auth/SpringSecurityConfig.java`
+* `backend-unab-master/src/main/java/com/backend/unab/controllers/AuthRestController.java`
+* `frontend-unab-master/nginx/default.conf`
+* `docker-compose.yml`
+* `README-DOCKER.md`
+* `frontend-unab-master/README.md`
 
 ---
 
-# Validación
+# Validacion
 
-* Confirmar que `nginx/default.conf` tiene bloque `listen 443 ssl` con certificado válido
-* Verificar que `http://` es redirigido a `https://` con código 301
-* Confirmar que el puerto 9090 del backend no es accesible desde el exterior
-* Verificar que las credenciales HTTP Basic no son visibles en texto claro al capturar tráfico
-* Confirmar que el certificado SSL tiene fecha de expiración futura y renovación automatizada
+* Confirmar que el proyecto actual no implementa TLS en el repositorio
+* Confirmar que HTTP Basic sigue siendo el mecanismo actual
+* Requiere validacion antes de implementacion sobre que punto de entrada asumira TLS en el entorno real

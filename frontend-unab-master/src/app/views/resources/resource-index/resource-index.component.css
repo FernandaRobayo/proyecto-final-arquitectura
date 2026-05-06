@@ -26,5 +26,12 @@
 .resource-actions {
   display: flex;
   gap: 0.5rem;
-  white-space: nowrap;
+  flex-wrap: wrap;
+  white-space: normal;
+}
+
+@media (max-width: 768px) {
+  .resource-actions {
+    min-width: 140px;
+  }
 }

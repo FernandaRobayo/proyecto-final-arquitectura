@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { AuthLoginRequest } from '../../models/auth-login-request.model';
 import { HelperService, MessageType } from '../../utils/services/helper.service';
@@ -9,21 +9,16 @@ import { LoginService } from './login.service';
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
-export class LoginComponent implements OnInit {
+export class LoginComponent {
   public frmLogin: FormGroup;
   public authError = '';
   public isSubmitting = false;
-  public backendUrl = '';
 
   constructor(public helperService: HelperService, public service: LoginService) {
     this.frmLogin = new FormGroup({
       username: new FormControl(null, Validators.required),
       password: new FormControl(null, Validators.required)
     });
-  }
-
-  ngOnInit(): void {
-    this.backendUrl = this.service.getApiUrl();
   }
 
   iniciarSesion(): void {

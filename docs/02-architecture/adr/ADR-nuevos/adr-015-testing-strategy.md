@@ -1,112 +1,84 @@
-# ADR-015 — Estrategia de pruebas automatizadas por capas
+# ADR-015 - Estrategia incremental de pruebas automatizadas por capas
 
 ## Estado
 
-Propuesto — 2026-05-02
+Requiere validacion - 2026-05-02
 
 ---
 
 # Contexto
 
-El proyecto incluye la infraestructura de testing por defecto de Spring Boot (`spring-boot-starter-test` con JUnit 5 y Mockito) y Angular (Karma + Jasmine con Protractor para E2E), pero no existe una estrategia documentada que defina qué se prueba, cómo se aísla y qué cobertura es aceptable en cada capa.
+El proyecto ya cuenta con evidencia de pruebas automatizadas, pero de forma parcial y sin una estrategia consolidada documentada:
 
-Sin esta estrategia, los desarrolladores toman decisiones individuales sobre nivel de aislamiento, cobertura y herramientas, generando inconsistencias en la calidad del conjunto de pruebas y en los criterios de aceptación del pipeline de CI/CD.
+* backend con pruebas unitarias sobre servicios
+* frontend con configuracion de pruebas unitarias Angular
+* frontend con estructura E2E de Protractor
+
+No se confirma en el proyecto actual una politica formal de cobertura ni un pipeline CI/CD operativo.
 
 ---
 
 # Problema
 
-Sin una estrategia de pruebas definida:
+Sin una estrategia documentada de pruebas:
 
-* no se sabe qué cobertura de pruebas existe ni cuál es el umbral aceptable
-* las pruebas de integración pueden levantar el contexto completo de Spring cuando solo necesitan probar una unidad
-* las pruebas de base de datos pueden usar la misma instancia de producción si no están aisladas
-* el pipeline de CI/CD no tiene un criterio claro de cuándo una build es válida en términos de pruebas
-* los tests E2E (Protractor) pueden estar desactualizados sin saberlo
+* no hay una expectativa comun sobre que capas deben cubrirse
+* la calidad depende de decisiones individuales del equipo
+* es dificil priorizar que tipos de pruebas agregar primero
 
 ---
 
-# Decisión Arquitectónica
+# Decision Arquitectonica
 
-Se propone adoptar una **estrategia de pruebas en pirámide** con tres niveles de aislamiento:
+Requiere validacion antes de implementacion.
 
-```
-                  ┌─────────────────────────────┐
-                  │      E2E / Angular          │
-                  │   Protractor — flujos clave │  Pocos, lentos, alto valor
-                  └─────────────┬───────────────┘
-                                │
-                  ┌─────────────▼───────────────┐
-                  │   Integración / API         │
-                  │  @SpringBootTest + H2        │  Moderados
-                  │  o Testcontainers MySQL      │
-                  └─────────────┬───────────────┘
-                                │
-                  ┌─────────────▼───────────────┐
-                  │       Unitarias             │
-                  │  JUnit 5 + Mockito (back)   │  Muchas, rápidas
-                  │  Karma + Jasmine (front)    │
-                  └─────────────────────────────┘
-```
+Se propone adoptar una estrategia incremental de pruebas por capas, priorizando:
 
-Reglas de la estrategia:
+* pruebas unitarias de servicios backend
+* pruebas unitarias de componentes y guards frontend
+* validaciones de integracion basicas sobre endpoints criticos
+* mantenimiento o depuracion de los flujos E2E realmente utiles
 
-```
-Unitarias      → Una clase · Dependencias mockeadas · Rápidas
-                 Objetivo: cubrir lógica de negocio en Services
-
-Integración    → Controller → Service → DAO · H2 en memoria
-                 NO usan la base de datos de producción
-                 Verifican el flujo completo de una petición
-
-E2E            → Escenarios críticos del usuario: login, CRUD principal
-                 Se ejecutan en entorno similar a producción
-                 No más de 10-15 escenarios clave
-
-Umbral         → Cobertura mínima: 70% en capa de Services (backend)
-                 Bloquea el pipeline de CI/CD si no se alcanza
-```
+No se aprueban en este ADR herramientas o umbrales especificos no confirmados en el proyecto actual.
 
 ---
 
-# Diagrama de la pirámide de pruebas
+# Stack tecnologico
+
+| Elemento | Estado actual | Propuesta futura |
+|---|---|---|
+| Backend tests | JUnit 5 + Mockito via `spring-boot-starter-test` | Continuar y ampliar |
+| Frontend unit tests | Karma + Jasmine | Continuar y ampliar |
+| Frontend E2E | Protractor presente en el proyecto | Revisar utilidad real y mantener solo escenarios valiosos |
+
+---
+
+# Diagrama del stack
 
 ```
-                  ╔═════════════════════════════╗
-                  ║      E2E (Protractor)       ║
-                  ║  login → CRUD → logout      ║   3-10 tests
-                  ╠═════════════════════════════╣
-                  ║   Integración (@SpringBoot) ║
-                  ║  HTTP → Service → H2/MySQL  ║  10-30 tests
-                  ╠═════════════════════════════╣
-                  ║       Unitarias             ║
-                  ║  Service + lógica negocio   ║  50+ tests
-                  ║  Karma + Jasmine (Angular)  ║
-                  ╚═════════════════════════════╝
-
-  Velocidad:     Rápido ─────────────────────▶ Lento
-  Confianza:     Baja ──────────────────────▶ Alta
-  Cantidad:      Muchos ──────────────────▶ Pocos
+Backend services -> pruebas unitarias
+Frontend components/guards -> pruebas unitarias
+Endpoints criticos -> validacion de integracion basica
+Flujos clave usuario -> E2E selectivo
 ```
 
 ---
 
 # Alternativas consideradas
 
-| Alternativa | Descripción | Por qué no se eligió |
-|---|---|---|
-| Solo pruebas unitarias | Máxima velocidad, mínima confianza en integración | No detecta problemas de integración entre capas ni de configuración de Spring |
-| Solo pruebas de integración con BD real | Mayor fidelidad, máxima lentitud | Lentas, requieren BD disponible, no aisladas entre ejecuciones |
-| Sin estrategia formal | Cada desarrollador decide | Inconsistencia en cobertura; sin criterio de aceptación para CI/CD |
+| Alternativa | Por que no se eligio |
+|---|---|
+| No documentar estrategia | Mantiene dispersion y criterios implícitos |
+| Apostar solo por E2E | Aumenta costo y fragilidad para este proyecto |
+| Fijar desde ya herramientas y umbrales no presentes | No esta respaldado por evidencia actual |
 
 ---
 
-# Beneficios Arquitectónicos
+# Beneficios Arquitectonicos
 
-* La pirámide garantiza velocidad (muchas unitarias) con confianza en integración (pocas de integración)
-* H2 en memoria o Testcontainers aíslan las pruebas de integración de la base de datos de producción
-* Un criterio de cobertura mínimo documentado permite bloquear builds insuficientes en CI/CD
-* La estrategia es incremental: puede implementarse por módulo empezando por los Services
+* Ordena el crecimiento de pruebas sin sobredimensionar la solucion
+* Alinea pruebas con la arquitectura por capas del proyecto
+* Facilita discutir prioridades tecnicas antes de invertir en tooling adicional
 
 ---
 
@@ -114,40 +86,33 @@ Umbral         → Cobertura mínima: 70% en capa de Services (backend)
 
 | Ventaja | Desventaja |
 |---|---|
-| Pirámide equilibra velocidad y confianza | Requiere tiempo inicial para escribir pruebas de código existente |
-| H2/Testcontainers aíslan pruebas de integración | H2 no es 100% compatible con MySQL; puede no detectar problemas específicos de MySQL 8.0 |
-| Criterio de cobertura objetivo en CI/CD | Testcontainers requiere Docker disponible en el agente de CI/CD |
+| Estrategia pragmatica y compatible con el estado real del repositorio | Requiere acuerdo posterior del equipo para concretar alcance y criterios |
+| Aprovecha lo ya existente | No resuelve por si sola cobertura o automatizacion futura |
 
 ---
 
 # Impacto en el Sistema
 
-**Backend:** Verificar cobertura actual con Jacoco; agregar H2 o Testcontainers para integración; documentar umbral de cobertura mínima (70% en Services).
+**Backend:** Consolidar y ampliar pruebas sobre servicios y comportamiento critico.
 
-**Frontend:** Verificar estado de pruebas Karma/Jasmine; definir alcance de tests Protractor E2E; documentar escenarios críticos cubiertos.
+**Frontend:** Mantener pruebas utiles y revisar el valor real de los E2E existentes.
 
-**Base de datos:** Agregar H2 como dependencia de test para aislar pruebas de integración.
-
-**DevOps:** El pipeline de CI/CD debe ejecutar los tres niveles y bloquear si la cobertura cae por debajo del umbral definido.
-
-**Seguridad:** Las pruebas de integración no deben usar credenciales de producción; usar datos de prueba aislados.
-
-**Documentación:** El umbral de cobertura y los comandos para ejecutar cada nivel deben documentarse en `README.md`.
+**Documentacion:** Debe dejar claro que hoy la estrategia es una propuesta incremental y no una politica plenamente implementada.
 
 ---
 
-# Evidencia (estado actual — base para la propuesta)
+# Evidencia
 
-* `backend-unab-master/pom.xml`: Incluye `spring-boot-starter-test` (JUnit 5 + Mockito). No se evidencia Testcontainers ni Jacoco
-* `frontend-unab-master/karma.conf.js`: Configuración Karma para pruebas unitarias Angular. Contenido no está en las entradas
-* `frontend-unab-master/e2e/`: Directorio de pruebas E2E con Protractor. Contenido no está en las entradas
+* `backend-unab-master/pom.xml`
+* `backend-unab-master/src/test/java/com/backend/unab/models/services/`
+* `frontend-unab-master/karma.conf.js`
+* `frontend-unab-master/e2e/`
+* `frontend-unab-master/src/app/**/*.spec.ts`
 
 ---
 
-# Validación
+# Validacion
 
-* Confirmar que existen pruebas unitarias para la capa de Services del backend con Mockito
-* Verificar que las pruebas de integración usan H2 en memoria o Testcontainers (no la BD de producción)
-* Confirmar que `ng test` ejecuta pruebas unitarias de Angular sin errores
-* Verificar que el reporte de cobertura Jacoco muestra ≥70% en la capa de Services
-* Confirmar que el pipeline de CI/CD bloquea builds por debajo del umbral de cobertura
+* Confirmar que siguen existiendo pruebas unitarias backend en `src/test`
+* Confirmar que el frontend mantiene configuracion de Karma/Jasmine y estructura E2E
+* Requiere validacion antes de implementacion sobre alcance, prioridad y mantenimiento de los E2E

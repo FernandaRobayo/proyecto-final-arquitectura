@@ -30,17 +30,30 @@ La autenticacion actual usa:
 Mecanismo    -> HTTP Basic Authentication
 Sesiones     -> Stateless (SessionCreationPolicy.STATELESS)
 Login        -> POST /api/auth/login
-Respuesta    -> JSON con accessToken de tipo Basic
+Respuesta    -> JSON con credencial Basic reconstruida para reutilizacion
 Roles seed   -> ROLE_ADMIN
                ROLE_STAFF
 Frontend     -> auth.interceptor.ts adjunta Authorization
 ```
 
+El `accessToken` actual no corresponde a un token emitido por el servidor con semantica de JWT u otro mecanismo independiente. La implementacion observada devuelve una credencial `Basic ...` construida a partir de `username:password` y utilizada por el frontend para reenviar el encabezado `Authorization`.
+
 No se confirma en el codigo actual una autorizacion fina por rol en endpoints; la configuracion observada exige autenticacion para `anyRequest()`.
 
 ---
 
-# Diagrama del flujo de autenticacion
+# Stack tecnologico
+
+| Elemento | Tecnologia o mecanismo | Evidencia principal |
+|---|---|---|
+| Seguridad backend | Spring Security | `SpringSecurityConfig.java` |
+| Transporte de credenciales | HTTP Basic | `SpringSecurityConfig.java`, `AuthRestController.java` |
+| Password hashing | BCrypt | `SpringSecurityConfig.java`, `auth-seed.sql` |
+| Persistencia usuarios y roles | MySQL + Spring Data JPA | `UsuarioService.java`, `auth-seed.sql` |
+
+---
+
+# Diagrama del stack
 
 ```
 Angular SPA -> POST /api/auth/login -> AuthRestController
@@ -67,12 +80,21 @@ Frontend adjunta Authorization: Basic ... en llamadas a /api/*
 
 ---
 
+# Beneficios Arquitectonicos
+
+* Implementacion simple y coherente con Spring Security
+* Integracion directa con usuarios y roles persistidos en base de datos
+* Menor complejidad que mecanismos tokenizados mas avanzados
+
+---
+
 # Trade-offs
 
 | Ventaja | Desventaja |
 |---|---|
-| Implementacion simple y coherente con Spring Security | HTTP Basic requiere proteger el transporte en despliegues productivos |
-| Compatible con SPA y API separadas | No se observa revocacion ni expiracion de token mas alla de la credencial base |
+| Implementacion simple y coherente con Spring Security | HTTP Basic requiere proteger el transporte en despliegues reales |
+| Compatible con SPA y API separadas | La respuesta de login puede confundirse con un token emitido por el servidor si no se documenta correctamente |
+| Persistencia de roles en base de datos | No se observa revocacion ni expiracion independiente de la credencial |
 
 ---
 
@@ -80,7 +102,7 @@ Frontend adjunta Authorization: Basic ... en llamadas a /api/*
 
 **Backend:** `SpringSecurityConfig`, `AuthRestController` y `UsuarioService`.
 
-**Frontend:** `LoginService` consume `/api/auth/login` y `AuthInterceptor` reenvia el token.
+**Frontend:** `LoginService` consume `/api/auth/login` y `AuthInterceptor` reenvia la credencial `Authorization`.
 
 **Base de datos:** Usuarios y roles iniciales definidos en `auth-seed.sql`.
 
@@ -103,3 +125,4 @@ Frontend adjunta Authorization: Basic ... en llamadas a /api/*
 * Confirmar `SessionCreationPolicy.STATELESS` y `httpBasic()` en `SpringSecurityConfig.java`
 * Confirmar `POST /api/auth/login` en `AuthRestController.java`
 * Confirmar `ROLE_ADMIN` y `ROLE_STAFF` en `auth-seed.sql`
+* Confirmar que la respuesta de login devuelve una credencial `Basic ...` y no un JWT

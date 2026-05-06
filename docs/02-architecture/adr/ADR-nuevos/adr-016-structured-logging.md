@@ -1,118 +1,82 @@
-# ADR-016 — Logging estructurado con correlación de peticiones
+# ADR-016 - Logging consistente con correlacion de peticiones
 
 ## Estado
 
-Propuesto — 2026-05-02
+Propuesto - 2026-05-02
 
 ---
 
 # Contexto
 
-Spring Boot incluye Logback como framework de logging por defecto, configurado para salida en texto plano a la consola. Docker captura esta salida estándar y la expone via `docker compose logs`.
-
-El formato de texto plano es legible para humanos en desarrollo, pero dificulta el análisis automatizado, el filtrado por campo y la correlación de múltiples líneas de log pertenecientes a una misma petición HTTP en entornos concurrentes.
+El backend usa el logging por defecto de Spring Boot hacia salida estandar. No se observa una politica documentada sobre formato de logs, uso de correlation ID o exclusion explicita de datos sensibles.
 
 ---
 
 # Problema
 
-Con logging en texto plano sin correlación de peticiones:
+Sin una politica de logging consistente:
 
-* es imposible filtrar automáticamente todos los logs de una sola petición entre los logs de peticiones concurrentes
-* un error en producción requiere leer líneas de log manualmente para reconstruir el flujo completo
-* no es posible integrar con herramientas de observabilidad (ELK Stack, Grafana Loki, CloudWatch) sin transformación adicional
-* no existe un identificador único (`correlationId`) que relacione los logs del backend con las peticiones del frontend
-
----
-
-# Decisión Arquitectónica
-
-Se propone adoptar **logging estructurado en formato JSON** con correlación de peticiones usando MDC:
-
-```
-Formato        →  JSON (logstash-logback-encoder)
-Correlación    →  MDC (Mapped Diagnostic Context) con X-Correlation-ID
-                  por petición HTTP
-Campos mínimos →  timestamp · level · logger · message
-                  correlationId · method · path · statusCode
-Destino        →  stdout (Docker captura y reenvía al driver de logging)
-```
-
-Implementación del filtro de correlación:
-
-```java
-@Component
-public class CorrelationFilter implements Filter {
-    public void doFilter(
-            ServletRequest req, ServletResponse res, FilterChain chain)
-            throws IOException, ServletException {
-
-        HttpServletRequest httpReq = (HttpServletRequest) req;
-        String correlationId = Optional
-            .ofNullable(httpReq.getHeader("X-Correlation-ID"))
-            .orElse(UUID.randomUUID().toString());
-
-        MDC.put("correlationId", correlationId);
-        try {
-            chain.doFilter(req, res);
-        } finally {
-            MDC.clear();  // evita fuga de contexto en threads reutilizados
-        }
-    }
-}
-```
+* es mas dificil seguir el flujo de una peticion entre varias capas
+* el diagnostico de incidentes depende de mensajes dispersos
+* existe riesgo de registrar datos sensibles sin una regla clara
 
 ---
 
-# Diagrama del flujo de logging
+# Decision Arquitectonica
+
+Propuesta futura.
+
+Se propone adoptar una politica de logging consistente para el backend con estas reglas minimas:
+
+* emitir logs por `stdout`
+* usar niveles de log coherentes
+* evitar registrar credenciales o secretos
+* introducir un identificador de correlacion por peticion si el equipo valida su implementacion
+
+El uso de herramientas externas de observabilidad queda fuera del alcance de esta decision y, si se consideran mas adelante, deberan evaluarse por separado.
+
+---
+
+# Stack tecnologico
+
+| Elemento | Estado actual | Propuesta futura |
+|---|---|---|
+| Backend logging | Spring Boot / Logback por defecto | Politica consistente de mensajes y niveles |
+| Destino | `stdout` | `stdout` |
+| Correlacion | No confirmada en el proyecto actual | Correlation ID por peticion, si se valida |
+
+---
+
+# Diagrama del stack
 
 ```
-  Petición HTTP → CorrelationFilter
-                        │
-                        │  MDC.put("correlationId", "abc-123")
-                        ▼
-            ┌───────────────────────────┐
-            │  Controller               │  log.info("...")
-            │  Service                  │  log.debug("...")
-            │  DAO                      │  log.error("...")
-            └───────────┬───────────────┘
-                        │  cada log incluye correlationId del MDC
-                        ▼
-            ┌───────────────────────────┐
-            │  Logback + JSON encoder   │
-            │                           │
-            │  {                        │
-            │    "timestamp": "...",    │
-            │    "level": "INFO",       │
-            │    "message": "...",      │
-            │    "correlationId":       │
-            │      "abc-123"            │
-            │  }                        │
-            └───────────┬───────────────┘
-                        │ stdout
-                        ▼
-            docker compose logs
-            filtrar por correlationId
+Peticion HTTP
+   |
+   v
+Backend
+   |
+   +-> logs con formato consistente
+   +-> sin credenciales ni secretos
+   +-> correlation ID si se implementa
 ```
 
 ---
 
 # Alternativas consideradas
 
-| Alternativa | Descripción | Por qué no se eligió |
-|---|---|---|
-| Mantener logging texto plano actual | Sin cambios en la configuración de Logback | Dificulta el análisis automatizado y la correlación; no escala con el volumen de logs |
-| OpenTelemetry / Jaeger (tracing distribuido) | Instrumentación completa de trazas distribuidas | Mayor complejidad; adecuado para múltiples servicios; puede adoptarse como evolución futura desde esta base |
-| Logging centralizado solo en Nginx | Capturar solo las peticiones HTTP en Nginx | No incluye la perspectiva del backend ni los errores internos de la aplicación |
+| Alternativa | Por que no se eligio |
+|---|---|
+| Mantener logging sin lineamientos | Mantiene inconsistencia y menor trazabilidad |
+| Definir desde ya una plataforma externa de observabilidad | No esta confirmada en el proyecto actual |
+| No considerar correlation ID | Reduce capacidad futura de seguimiento por peticion |
 
 ---
 
-# Beneficios Arquitectónicos
+# Beneficios Arquitectonicos
 
-* Todos los logs de una petición comparten el mismo `correlationId`; se pueden filtrar y agrupar con precisión
-* El formato JSON es consumible directamente por ELK Stack, Grafana Loki, AWS CloudWatch Logs y similares
-* Los logs estructurados permiten crear alertas basadas en campos (ej: alertar cuando `level=ERROR` supera un umbral)
-* La implementación es incremental: se puede adoptar sin cambiar la lógica de negocio existente
+* Mejora mantenimiento y diagnostico
+* Reduce riesgo de exponer informacion sensible en logs
+* Permite una evolucion futura ordenada si luego se adoptan herramientas externas
 
 ---
 
@@ -120,40 +84,31 @@ public class CorrelationFilter implements Filter {
 
 | Ventaja | Desventaja |
 |---|---|
-| Correlación exacta de todos los logs de una petición | Los logs en JSON son menos legibles directamente en consola para desarrollo |
-| Integrable con herramientas de observabilidad | Requiere agregar `logstash-logback-encoder` como dependencia |
-| Alertas y métricas basadas en campos de log | El `CorrelationFilter` es una dependencia transversal del backend |
-| Preparado para evolución a tracing distribuido | — |
+| Lineamientos simples y pragmaticos | Requiere disciplina al escribir logs y revisar mensajes existentes |
+| Correlation ID puede mejorar trazabilidad | Introduce un componente transversal si se implementa |
 
 ---
 
 # Impacto en el Sistema
 
-**Backend:** Agregar dependencia `logstash-logback-encoder`; configurar `logback-spring.xml` para formato JSON; implementar `CorrelationFilter`; configurar MDC en todos los filtros relevantes.
+**Backend:** Debe normalizar la forma de registrar eventos y errores.
 
-**Frontend:** Opcional: generar un `X-Correlation-ID` en el interceptor Angular y adjuntarlo a las peticiones para trazar de extremo a extremo.
+**Seguridad:** Debe prohibir expresamente el registro de credenciales y secretos.
 
-**Base de datos:** Sin impacto.
-
-**DevOps:** `docker compose logs` sigue funcionando; se habilita la posibilidad de reenviar stdout a un colector de logs (ELK, Loki, CloudWatch).
-
-**Seguridad:** Los logs no deben incluir credenciales, contraseñas ni el valor del encabezado `Authorization`. El `CorrelationFilter` no debe loguear el header de autenticación.
-
-**Documentación:** Documentar los campos estándar de los logs JSON y cómo filtrar por `correlationId` para diagnóstico de incidentes.
+**Operaciones:** Mantiene `stdout` como salida base y evita asumir plataformas externas no confirmadas.
 
 ---
 
-# Evidencia (estado actual — base para la propuesta)
+# Evidencia
 
-* `backend-unab-master/pom.xml`: Incluye `spring-boot-starter` con Logback por defecto; no se evidencia `logstash-logback-encoder`
-* No se encontró configuración `logback-spring.xml` en el repositorio
-* `docker-compose.yml`: Los contenedores usan el driver de logging por defecto de Docker (json-file)
+* `backend-unab-master/pom.xml`
+* `backend-unab-master/src/main/resources/application.properties`
+* `docker-compose.yml`
 
 ---
 
-# Validación
+# Validacion
 
-* Verificar que los logs del backend son emitidos en formato JSON con campos `timestamp`, `level`, `message`, `correlationId`
-* Confirmar que todos los logs de una misma petición HTTP comparten el mismo `correlationId`
-* Verificar que el `CorrelationFilter` no incluye el valor del encabezado `Authorization` en los logs
-* Confirmar que el formato JSON es válido y parseable: `docker compose logs backend | jq .`
+* Confirmar que el proyecto actual no implementa correlation ID
+* Confirmar que no existe una politica documentada de logging mas alla del comportamiento por defecto
+* Requiere validacion antes de implementacion sobre el formato exacto y el alcance del correlation ID

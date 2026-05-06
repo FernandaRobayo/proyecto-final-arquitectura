@@ -77,3 +77,48 @@
 .app-logout {
   border-radius: 999px;
 }
+
+@media (max-width: 1024px) {
+  .app-header,
+  .app-main {
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+
+  .app-nav {
+    flex-basis: 100%;
+    order: 3;
+  }
+
+  .app-session {
+    margin-left: auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .app-header {
+    align-items: flex-start;
+    padding-top: 0.9rem;
+    padding-bottom: 0.9rem;
+  }
+
+  .app-nav {
+    gap: 0.55rem;
+  }
+
+  .app-nav a,
+  .app-logout {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .app-session {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .app-main {
+    padding: 1rem;
+  }
+}

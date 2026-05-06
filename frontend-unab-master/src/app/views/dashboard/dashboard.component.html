@@ -1,4 +1,4 @@
-<app-breadcrumb title="Dashboard"></app-breadcrumb>
+<app-breadcrumb title="Panel principal"></app-breadcrumb>
 
 <section class="content">
   <div class="container">
@@ -6,52 +6,52 @@
       <article class="dashboard-hero card">
         <div class="card-body">
           <div class="dashboard-hero__header">
-            <h2>Veterinary Dashboard</h2>
-            <p>Daily overview of pets, appointments and clinical activity</p>
+            <h2>Panel veterinario</h2>
+            <p>Resumen diario de mascotas, citas y actividad clinica</p>
           </div>
 
           <div class="dashboard-stats">
             <article class="dashboard-stat-card">
               <span class="dashboard-stat-card__icon"><i class="fas fa-paw"></i></span>
               <span class="dashboard-stat-card__value">{{ petsRegistered }}</span>
-              <span class="dashboard-stat-card__label">Pets registered</span>
+              <span class="dashboard-stat-card__label">Mascotas registradas</span>
             </article>
 
             <article class="dashboard-stat-card">
               <span class="dashboard-stat-card__icon"><i class="fas fa-calendar-alt"></i></span>
               <span class="dashboard-stat-card__value">{{ appointmentsToday }}</span>
-              <span class="dashboard-stat-card__label">Appointments today</span>
+              <span class="dashboard-stat-card__label">Citas de hoy</span>
             </article>
 
             <article class="dashboard-stat-card">
               <span class="dashboard-stat-card__icon"><i class="fas fa-clinic-medical"></i></span>
               <span class="dashboard-stat-card__value">{{ activePatients }}</span>
-              <span class="dashboard-stat-card__label">Active patients</span>
+              <span class="dashboard-stat-card__label">Pacientes activos</span>
             </article>
 
             <article class="dashboard-stat-card">
               <span class="dashboard-stat-card__icon"><i class="fas fa-pills"></i></span>
               <span class="dashboard-stat-card__value">{{ treatmentsInProgress }}</span>
-              <span class="dashboard-stat-card__label">Treatments in progress</span>
+              <span class="dashboard-stat-card__label">Tratamientos en curso</span>
             </article>
           </div>
 
           <div class="dashboard-hero__footer">
             <section class="dashboard-activity">
-              <span class="dashboard-kicker">Today's activity</span>
+              <span class="dashboard-kicker">Actividad del dia</span>
               <div class="dashboard-activity__list">
-                <p><strong>Next appointment:</strong> {{ nextAppointment }}</p>
-                <p><strong>Vet assigned:</strong> {{ assignedVet }}</p>
-                <p><strong>Status:</strong> {{ appointmentStatus }}</p>
+                <p><strong>Proxima cita:</strong> {{ nextAppointment }}</p>
+                <p><strong>Veterinario asignado:</strong> {{ assignedVet }}</p>
+                <p><strong>Estado:</strong> {{ appointmentStatus }}</p>
               </div>
             </section>
 
             <section class="dashboard-actions">
-              <span class="dashboard-kicker">Quick actions</span>
+              <span class="dashboard-kicker">Acciones rapidas</span>
               <div class="dashboard-actions__group">
-                <a class="dashboard-action-btn" [routerLink]="['/appointments/create']">New Appointment</a>
-                <a class="dashboard-action-btn" [routerLink]="['/pets/create']">Register Pet</a>
-                <a class="dashboard-action-btn" [routerLink]="['/treatments/create']">New Treatment</a>
+                <a class="dashboard-action-btn" [routerLink]="['/appointments/create']">Nueva cita</a>
+                <a class="dashboard-action-btn" [routerLink]="['/pets/create']">Registrar mascota</a>
+                <a class="dashboard-action-btn" [routerLink]="['/treatments/create']">Nuevo tratamiento</a>
               </div>
             </section>
           </div>
@@ -62,10 +62,10 @@
         <article class="dashboard-section card">
           <div class="card-body">
             <div class="section-heading">
-              <span class="section-kicker">Core modules</span>
-              <h3>Clinic management areas</h3>
+              <span class="section-kicker">Modulos centrales</span>
+              <h3>Areas de gestion clinica</h3>
               <p>
-                Lightweight access to the main operational modules without changing the existing navigation.
+                Acceso rapido a los modulos operativos principales sin cambiar la navegacion actual.
               </p>
             </div>
 
@@ -73,48 +73,48 @@
               <a class="module-card" [routerLink]="['/customers']">
                 <span class="module-icon"><i class="fas fa-user"></i></span>
                 <div>
-                  <h4>Customers</h4>
-                  <p>Manage owners and contact details.</p>
+                  <h4>Clientes</h4>
+                  <p>Gestiona propietarios y datos de contacto.</p>
                 </div>
               </a>
 
               <a class="module-card" [routerLink]="['/pets']">
                 <span class="module-icon"><i class="fas fa-paw"></i></span>
                 <div>
-                  <h4>Pets</h4>
-                  <p>Review patient profiles and core data.</p>
+                  <h4>Mascotas</h4>
+                  <p>Consulta perfiles de pacientes y datos principales.</p>
                 </div>
               </a>
 
               <a class="module-card" [routerLink]="['/appointments']">
                 <span class="module-icon"><i class="fas fa-calendar-alt"></i></span>
                 <div>
-                  <h4>Appointments</h4>
-                  <p>Coordinate visits and daily scheduling.</p>
+                  <h4>Citas</h4>
+                  <p>Coordina visitas y agenda diaria.</p>
                 </div>
               </a>
 
               <a class="module-card" [routerLink]="['/veterinarians']">
                 <span class="module-icon"><i class="fas fa-user-md"></i></span>
                 <div>
-                  <h4>Veterinarians</h4>
-                  <p>Keep the care team and specialties organized.</p>
+                  <h4>Veterinarios</h4>
+                  <p>Mantiene organizado el equipo medico y sus especialidades.</p>
                 </div>
               </a>
 
               <a class="module-card" [routerLink]="['/medical-records']">
                 <span class="module-icon"><i class="fas fa-notes-medical"></i></span>
                 <div>
-                  <h4>Medical Records</h4>
-                  <p>Access diagnoses, notes and clinical history.</p>
+                  <h4>Historias clinicas</h4>
+                  <p>Accede a diagnosticos, notas y antecedentes clinicos.</p>
                 </div>
               </a>
 
               <a class="module-card" [routerLink]="['/treatments']">
                 <span class="module-icon"><i class="fas fa-pills"></i></span>
                 <div>
-                  <h4>Treatments</h4>
-                  <p>Track medications, dosage and follow-up plans.</p>
+                  <h4>Tratamientos</h4>
+                  <p>Da seguimiento a medicamentos, dosis y planes de control.</p>
                 </div>
               </a>
             </div>
@@ -124,35 +124,35 @@
         <aside class="dashboard-side">
           <article class="dashboard-section card">
             <div class="card-body">
-              <span class="section-kicker">Quick access</span>
-              <h3>Frequently used actions</h3>
+              <span class="section-kicker">Acceso rapido</span>
+              <h3>Acciones frecuentes</h3>
 
               <nav class="quick-links">
-                <a [routerLink]="['/appointments']">Open appointment board</a>
-                <a [routerLink]="['/pets']">Review active patients</a>
-                <a [routerLink]="['/medical-records']">Check medical records</a>
-                <a [routerLink]="['/treatments']">Monitor treatments</a>
+                <a [routerLink]="['/appointments']">Abrir tablero de citas</a>
+                <a [routerLink]="['/pets']">Revisar pacientes activos</a>
+                <a [routerLink]="['/medical-records']">Consultar historias clinicas</a>
+                <a [routerLink]="['/treatments']">Monitorear tratamientos</a>
               </nav>
             </div>
           </article>
 
           <article class="dashboard-section card">
             <div class="card-body">
-              <span class="section-kicker">Care flow</span>
-              <h3>Daily coordination</h3>
+              <span class="section-kicker">Flujo de atencion</span>
+              <h3>Coordinacion diaria</h3>
 
               <div class="care-flow">
                 <div class="care-flow__item">
-                  <strong>1. Intake</strong>
-                  <p>Register owners and patients before consultation.</p>
+                  <strong>1. Recepcion</strong>
+                  <p>Registra propietarios y pacientes antes de la consulta.</p>
                 </div>
                 <div class="care-flow__item">
-                  <strong>2. Consultation</strong>
-                  <p>Organize appointments and assign veterinary staff.</p>
+                  <strong>2. Consulta</strong>
+                  <p>Organiza citas y asigna al personal veterinario.</p>
                 </div>
                 <div class="care-flow__item">
-                  <strong>3. Follow-up</strong>
-                  <p>Document history and treatments for continuity of care.</p>
+                  <strong>3. Seguimiento</strong>
+                  <p>Documenta historias y tratamientos para dar continuidad al cuidado.</p>
                 </div>
               </div>
             </div>

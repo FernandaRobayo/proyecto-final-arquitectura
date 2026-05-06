@@ -1,94 +1,76 @@
-# ADR-014 — Documentación formal de la API con OpenAPI 3 y Springdoc
+# ADR-014 - Documentacion formal de la API con OpenAPI 3
 
 ## Estado
 
-Propuesto — 2026-05-02
+Propuesto - 2026-05-02
 
 ---
 
 # Contexto
 
-El sistema no tiene documentación formal del contrato de la API REST. El frontend consume el backend basándose en convenciones implícitas: los servicios Angular deben leer el código de los controladores Spring Boot para conocer los endpoints, parámetros y estructuras de respuesta.
-
-Este acoplamiento implícito dificulta la incorporación de nuevos desarrolladores, la integración con herramientas de prueba automatizada y la evolución controlada del contrato.
+El proyecto expone una API REST bajo `/api/*`, pero la documentacion API del repositorio es insuficiente: `docs/05-api/api-documentation.md` esta vacio y no se observa una especificacion OpenAPI generada desde el backend.
 
 ---
 
 # Problema
 
-Sin documentación formal de la API:
+Sin documentacion formal de la API:
 
-* un nuevo desarrollador debe leer el código del backend para entender qué endpoints existen y qué retornan
-* no existe un contrato verificable entre frontend y backend que detecte incompatibilidades de forma temprana
-* las herramientas de prueba (Postman, Insomnia) deben configurarse manualmente sin una fuente de verdad
-* en un escenario de múltiples consumidores, cada uno debe descubrir la API de forma independiente
-* no hay forma automática de generar clientes tipados para el frontend a partir del contrato
+* los desarrolladores deben inspeccionar controladores y DTOs para entender el contrato
+* el onboarding tecnico es mas lento
+* no hay una fuente de verdad clara para endpoints, payloads y respuestas
 
 ---
 
-# Decisión Arquitectónica
+# Decision Arquitectonica
 
-Se propone integrar **Springdoc-openapi** para generar automáticamente la especificación OpenAPI 3 a partir de los controladores Spring Boot:
+Propuesta futura.
 
-```
-Dependencia     →  springdoc-openapi-ui
-Spec JSON       →  GET /v3/api-docs
-Spec YAML       →  GET /v3/api-docs.yaml
-Swagger UI      →  GET /swagger-ui.html  (interfaz visual interactiva)
+Se propone incorporar una especificacion OpenAPI 3 generada desde el backend para documentar el contrato REST actual del proyecto.
 
-Anotaciones opcionales para enriquecer la documentación:
-  @OpenAPIDefinition  →  en clase principal (título, versión, descripción)
-  @Operation          →  en métodos de controladores
-  @Schema             →  en DTOs para describir campos y restricciones
-```
-
-La especificación se genera en tiempo de arranque desde el código; es siempre consistente con la implementación real.
+Esta propuesta no depende de introducir versionado `/api/v1/*`. Debe documentar la API realmente existente mientras el sistema use rutas `/api/*`.
 
 ---
 
-# Diagrama del flujo de documentación
+# Stack tecnologico
+
+| Elemento | Estado actual | Propuesta futura |
+|---|---|---|
+| Contrato REST | Implicito en codigo | OpenAPI 3 |
+| Documentacion API | Archivo vacio o insuficiente | Especificacion generada desde backend |
+| Backend | Spring Boot 2.5.3 | Spring Boot 2.5.3 |
+
+---
+
+# Diagrama del stack
 
 ```
-  Desarrollador / Postman / Generador de cliente
-                    │
-                    │ GET /swagger-ui.html
-                    ▼
-┌───────────────────────────────────────────────┐
-│            Springdoc Swagger UI               │
-│                                               │
-│  [ GET  /api/v1/customers      ]  ← Try it!  │
-│  [ POST /api/v1/customers      ]              │
-│  [ PUT  /api/v1/customers/{id} ]              │
-│  [ DELETE /api/v1/...          ]              │
-└───────────────────────┬───────────────────────┘
-                        │  lee
-                        ▼
-┌───────────────────────────────────────────────┐
-│          GET /v3/api-docs                     │
-│          Especificación OpenAPI 3 (JSON)      │
-│          generada desde controladores y DTOs  │
-└───────────────────────────────────────────────┘
+Controladores + DTOs
+        |
+        v
+Especificacion OpenAPI
+        |
+        v
+Documentacion navegable para equipo y consumo tecnico
 ```
 
 ---
 
 # Alternativas consideradas
 
-| Alternativa | Descripción | Por qué no se eligió |
-|---|---|---|
-| Documentación manual (README / Confluence) | Escribir endpoints a mano | Se desactualiza rápidamente; no verificable contra la implementación real |
-| Springfox | Librería Swagger más antigua para Spring | Springdoc es el sucesor activo; Springfox tiene problemas de compatibilidad con Spring Boot 2.5+ |
-| Sin documentación formal | Contratos implícitos | No escala; impide la incorporación eficiente de nuevos desarrolladores e integraciones |
+| Alternativa | Por que no se eligio |
+|---|---|
+| Mantener documentacion manual dispersa | Se desactualiza con facilidad |
+| No documentar formalmente la API | Dificulta mantenimiento y onboarding |
+| Amarrar la decision a `/api/v1/*` | No esta justificado por el estado actual del proyecto |
 
 ---
 
-# Beneficios Arquitectónicos
+# Beneficios Arquitectonicos
 
-* La especificación OpenAPI se genera automáticamente desde el código; siempre sincronizada
-* Swagger UI permite probar los endpoints directamente desde el navegador sin herramientas adicionales
-* El archivo `api-docs.yaml` puede usarse para generar clientes Angular tipados con Angular OpenAPI Generator
-* Facilita la incorporación de nuevos desarrolladores con un catálogo navegable de la API
-* Integra directamente con ADR-013 (versionado) para documentar cada versión de la API
+* Hace visible el contrato REST existente
+* Reduce dependencia de leer directamente el codigo para consumir la API
+* Mejora trazabilidad entre backend, frontend y documentacion
 
 ---
 
@@ -96,40 +78,32 @@ La especificación se genera en tiempo de arranque desde el código; es siempre 
 
 | Ventaja | Desventaja |
 |---|---|
-| Documentación siempre sincronizada con el código | El endpoint `/swagger-ui.html` debe protegerse o deshabilitarse en producción |
-| Permite probar endpoints desde el navegador | Requiere anotaciones adicionales en controladores y DTOs para documentación enriquecida |
-| Genera spec exportable para herramientas externas | Springdoc agrega una dependencia al proyecto |
-| Compatible con OpenAPI 3 estándar de la industria | — |
+| Contrato mas claro y util para el equipo | Introduce trabajo adicional de configuracion y mantenimiento |
+| Mejor soporte para onboarding | Requiere revisar que la documentacion expuesta no se trate como funcionalidad implementada antes de tiempo |
 
 ---
 
 # Impacto en el Sistema
 
-**Backend:** Agregar `springdoc-openapi-ui` en `pom.xml`; opcionalmente agregar `@Operation` y `@Schema` en controladores y DTOs para enriquecer la documentación.
+**Backend:** Debe exponer o generar una especificacion OpenAPI si la propuesta se implementa.
 
-**Frontend:** Sin impacto de código directo. El archivo `api-docs.yaml` puede usarse para generar servicios Angular automáticamente con Angular OpenAPI Generator.
+**Frontend:** Puede beneficiarse de una referencia formal del contrato, sin cambiar la API actual.
 
-**Base de datos:** Sin impacto.
-
-**DevOps:** Swagger UI (`/swagger-ui.html`) debe deshabilitarse o protegerse con autenticación en producción mediante propiedad `springdoc.swagger-ui.enabled=false`.
-
-**Seguridad:** La especificación OpenAPI expone la estructura de la API; el acceso a `/v3/api-docs` y `/swagger-ui.html` debe restringirse en producción para evitar reconocimiento de la API por actores externos.
-
-**Documentación:** OpenAPI reemplaza la necesidad de documentar endpoints manualmente; el contrato vive en el código.
+**Documentacion:** Sustituye la dependencia de un archivo vacio o insuficiente por una fuente mas util y trazable.
 
 ---
 
-# Evidencia (estado actual — base para la propuesta)
+# Evidencia
 
-* `backend-unab-master/pom.xml`: No incluye `springdoc-openapi-ui` actualmente
-* ADR-006 (archivado): Documenta el contrato REST implícito entre frontend y backend sin especificación formal
+* `docs/05-api/api-documentation.md`
+* `backend-unab-master/src/main/java/com/backend/unab/controllers/`
+* `backend-unab-master/src/main/java/com/backend/unab/dto/`
+* `backend-unab-master/pom.xml`
 
 ---
 
-# Validación
+# Validacion
 
-* Confirmar que `springdoc-openapi-ui` está en `pom.xml`
-* Verificar que `GET /v3/api-docs` retorna la especificación OpenAPI 3 en JSON
-* Confirmar que `GET /swagger-ui.html` muestra todos los endpoints de la API
-* Verificar que en producción el acceso a Swagger UI está restringido o deshabilitado
-* Confirmar que los DTOs tienen descripciones suficientes para que la documentación sea comprensible
+* Confirmar que la API actual sigue exponiendose bajo `/api/*`
+* Confirmar que `docs/05-api/api-documentation.md` sigue siendo insuficiente o vacio
+* Requiere validacion antes de implementacion sobre la herramienta exacta a usar para generar OpenAPI
