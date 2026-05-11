@@ -2,21 +2,19 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Team } from '../../utils/entitys/team.entity';
-import { environment } from '../../../environments/environment';
+import { buildApiUrl } from '../../utils/api-url';
 
 @Injectable({
   providedIn: 'root'
 })
 export class TeamsService {
-  private apiBaseUrl = environment.apiBaseUrl;
-  public urlBase = `${this.apiBaseUrl}/api/teams`;
+  public urlBase = buildApiUrl('/api/teams');
 
   constructor(public http: HttpClient) { }
 
   private get headers(): HttpHeaders {
     return new HttpHeaders({
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${localStorage.getItem('token') ?? ''}`
+      'Content-Type': 'application/json'
     });
   }
 

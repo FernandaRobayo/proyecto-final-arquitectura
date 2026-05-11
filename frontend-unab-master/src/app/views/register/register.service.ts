@@ -2,14 +2,12 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { User } from '../../utils/entitys/user.entity';
-import { environment } from '../../../environments/environment';
+import { buildApiUrl } from '../../utils/api-url';
 
 @Injectable({
   providedIn: 'root'
 })
 export class RegisterService {
-  private apiBaseUrl = environment.apiBaseUrl;
-
   private headers = new HttpHeaders({
     'Content-Type': 'application/json'
   });
@@ -24,6 +22,6 @@ export class RegisterService {
       password
     };
 
-    return this.http.post<User>(`${this.apiBaseUrl}/api/users`, JSON.stringify(data), { headers: this.headers });
+    return this.http.post<User>(buildApiUrl('/api/users'), JSON.stringify(data), { headers: this.headers });
   }
 }

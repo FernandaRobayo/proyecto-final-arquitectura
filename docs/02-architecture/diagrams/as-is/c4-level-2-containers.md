@@ -6,11 +6,12 @@ Este diagrama descompone el sistema actual en sus contenedores reales confirmado
 
 ## Diagrama
 
-- [c4-level-2-containers.puml](C:/www/proyecto-final-arquitectura/docs/02-architecture/diagrams/as-is/c4-level-2-containers.puml)
+- [c4-level-2-containers.png](C:/www/proyecto-final-arquitectura/docs/02-architecture/diagrams/as-is/c4-level-2-containers.png)
 
 ## Elementos
 
-- `Usuario web`
+- `Usuario interno de la veterinaria`
+  Agrupa a los roles internos `ROLE_ADMIN` y `ROLE_STAFF`.
 - `Frontend web`
   Angular 10 compilado y servido con Nginx.
 - `Backend API`
@@ -20,7 +21,7 @@ Este diagrama descompone el sistema actual en sus contenedores reales confirmado
 
 ## Relaciones
 
-- `Usuario web -> Frontend web`
+- `Usuario interno de la veterinaria -> Frontend web`
   Usa la interfaz desde el navegador por HTTP en `localhost:3000`.
 - `Frontend web -> Backend API`
   Consume `POST /api/auth/login` y los endpoints REST bajo `/api/*` por HTTP/JSON en el puerto `9090`.

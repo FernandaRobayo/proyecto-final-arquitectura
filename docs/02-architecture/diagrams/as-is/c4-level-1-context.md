@@ -2,21 +2,24 @@
 
 ## Descripcion
 
-Este diagrama muestra el contexto del sistema actual a nivel C4 Level 1. Representa unicamente a la persona usuaria y al sistema principal, sin descomponerlo en frontend, backend o base de datos.
+Este diagrama muestra el contexto del sistema actual a nivel C4 Level 1. Representa a las personas usuarias internas confirmadas y al sistema principal, sin descomponerlo en frontend, backend o base de datos.
 
 ## Diagrama
 
-- [c4-level-1-context.puml](C:/www/proyecto-final-arquitectura/docs/02-architecture/diagrams/as-is/c4-level-1-context.puml)
+- [c4-level-1-context.png](C:/www/proyecto-final-arquitectura/docs/02-architecture/diagrams/as-is/c4-level-1-context.png)
 
 ## Elementos
 
-- `Usuario web`
+- `Administrador`
+- `Personal operativo de la veterinaria`
 - `Sistema Veterinario`
 
 ## Relaciones
 
-- `Usuario web -> Sistema Veterinario`
-  Usa la aplicacion web desde un navegador para autenticarse y gestionar clientes, especies, razas, mascotas, veterinarios, citas, historias clinicas y tratamientos.
+- `Administrador -> Sistema Veterinario`
+  Usa la aplicacion web desde un navegador para autenticarse y gestionar la administracion general del sistema.
+- `Personal operativo de la veterinaria -> Sistema Veterinario`
+  Usa la aplicacion web desde un navegador para apoyar la gestion operativa de clientes, especies, razas, mascotas, veterinarios, citas, historias clinicas y tratamientos.
 
 ## Observaciones
 

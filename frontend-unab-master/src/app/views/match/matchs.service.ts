@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Match } from '../../utils/entitys/match.entity';
 import { User } from '../../utils/entitys/user.entity';
-import { environment } from '../../../environments/environment';
+import { buildApiUrl } from '../../utils/api-url';
 
 export interface MatchListItem {
   id: number;
@@ -20,15 +20,13 @@ export interface MatchListItem {
   providedIn: 'root'
 })
 export class MatchsService {
-  private apiBaseUrl = environment.apiBaseUrl;
-  public urlBase = `${this.apiBaseUrl}/api/matchs`;
+  public urlBase = buildApiUrl('/api/matchs');
 
   constructor(public http: HttpClient) { }
 
   private get headers(): HttpHeaders {
     return new HttpHeaders({
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${localStorage.getItem('token') ?? ''}`
+      'Content-Type': 'application/json'
     });
   }
 
@@ -65,6 +63,6 @@ export class MatchsService {
   }
 
   public getUsers(): Observable<User[]> {
-    return this.http.get<User[]>(`${this.apiBaseUrl}/api/users`, { headers: this.headers });
+    return this.http.get<User[]>(buildApiUrl('/api/users'), { headers: this.headers });
   }
 }
