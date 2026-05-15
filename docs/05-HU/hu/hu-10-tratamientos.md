@@ -70,13 +70,6 @@ cuando intenta guardar sin historia clínica asociada o sin descripción,
 entonces el sistema impide el registro  
 y muestra validación de campos obligatorios.
 
-### Escenario: Rechazar un tratamiento con historia clínica no válida
-
-Dado que el usuario se encuentra en el formulario de tratamientos,  
-cuando intenta registrar un tratamiento asociado a una historia clínica no válida,  
-entonces el sistema rechaza la operación  
-y muestra un mensaje indicando que la historia clínica asociada no es válida.
-
 ## Validaciones necesarias
 
 - La historia clínica asociada es obligatoria.

@@ -69,13 +69,6 @@ cuando intenta guardar sin nombre o sin especie asociada,
 entonces el sistema impide el registro  
 y muestra validación de campos obligatorios.
 
-### Escenario: Rechazar una raza con especie no válida
-
-Dado que el usuario se encuentra en el formulario de razas,  
-cuando intenta guardar una raza asociada a una especie no válida,  
-entonces el sistema rechaza la operación  
-y muestra un mensaje indicando que la especie asociada no es válida.
-
 ## Validaciones necesarias
 
 - El nombre de la raza es obligatorio.

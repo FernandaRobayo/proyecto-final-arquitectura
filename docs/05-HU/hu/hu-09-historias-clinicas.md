@@ -70,13 +70,6 @@ cuando intenta guardar sin cita asociada o sin diagnóstico,
 entonces el sistema impide el registro  
 y muestra validación de campos obligatorios.
 
-### Escenario: Rechazar una historia clínica para una cita no válida
-
-Dado que el usuario se encuentra en el formulario de historias clínicas,  
-cuando intenta registrar una historia clínica asociada a una cita no válida,  
-entonces el sistema rechaza la operación  
-y muestra un mensaje indicando que la cita asociada no es válida.
-
 ## Validaciones necesarias
 
 - La cita asociada es obligatoria.
@@ -86,7 +79,7 @@ y muestra un mensaje indicando que la cita asociada no es válida.
 ## Reglas de negocio
 
 - Toda historia clínica debe asociarse a una cita existente.
-- Se debe validar si cada cita puede tener máximo una historia clínica asociada.
+- El modelo actual restringe una historia clínica por cita asociada.
 - No se confirman flujos clínicos adicionales.
 
 ## Dependencias funcionales
@@ -106,7 +99,7 @@ y muestra un mensaje indicando que la cita asociada no es válida.
 
 ## Riesgos o consideraciones
 
-- La restricción de una historia clínica por cita debe validarse como regla funcional.
+- La restricción actual de una historia clínica por cita debe confirmarse como regla funcional definitiva si el alcance cambia.
 - La edición o eliminación de historias clínicas debe validarse por tratarse de información clínica sensible.
 - No se confirman reportes médicos ni flujos clínicos adicionales.
 - La implementación observada no confirma todavía un bloqueo funcional de eliminación cuando existan tratamientos asociados.
